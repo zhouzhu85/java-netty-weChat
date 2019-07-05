@@ -36,7 +36,7 @@ public class WsServerInitialzer extends ChannelInitializer<SocketChannel> {
          */
         pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
 
-        //自定义的handler TODO
-        pipeline.addLast(null);
+        //自定义的handler
+        pipeline.addLast(new ChatHandler());
     }
 }

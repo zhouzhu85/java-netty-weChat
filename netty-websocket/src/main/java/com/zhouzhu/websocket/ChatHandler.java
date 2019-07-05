@@ -1,11 +1,14 @@
 package com.zhouzhu.websocket;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.time.LocalDateTime;
 
 /**
  * @author zhouzhu
@@ -31,7 +34,10 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        super.handlerRemoved(ctx);
+        //当触发handlerRemoved，ChannelGroup会自动移除对应客户端的channel
+//        clients.remove(ctx.channel());
+        System.out.println("客户端断开，channel对应的长id为："+ctx.channel().id().asLongText());
+        System.out.println("客户端断开，channel对应的短id为："+ctx.channel().id().asShortText());
     }
 
     @Override
@@ -40,6 +46,11 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         String content = textWebSocketFrame.text();
         System.out.println("接收到的数据："+content);
 
+//        for (Channel channel : clients) {
+//            channel.writeAndFlush(new TextWebSocketFrame("[服务器在：]"+ LocalDateTime.now()+"接收到消息为："+content));
+//        }
 
+        // 下面这个方法，和上面的for循环一致
+        clients.writeAndFlush(new TextWebSocketFrame("[服务器在：]"+ LocalDateTime.now()+"接收到消息为："+content));
     }
 }
