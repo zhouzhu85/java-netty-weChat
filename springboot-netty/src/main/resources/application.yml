@@ -1,0 +1,48 @@
+############################################################
+#
+# 配置数据源相关	使用 HikariCP 数据源
+#
+############################################################
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/muxin-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    username: root
+    password: zhouzhu
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-timeout: 30000 #等待连接池分配连接的最大时长（毫秒），超过这个时长还没可用的连接则发生sqlexception,默认30秒
+      minimum-idle: 5 #最小连接数
+      maximum-pool-size: 15 #最大连接数
+      auto-commit: true #自动提交
+      idle-timeout: 600000 # 一个连接idle状态的最大时长（毫秒），超时则被释放，默认10分钟
+      pool-name: DatebookHikariCP #连接池名称
+      max-lifetime: 28740000 #一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），默认:30分钟 1800000ms，建议设置比数据库超时时长少60秒，参考MySQL wait_timeout参数（show variables like '%timeout%';）
+      connection-test-query: SELECT 1
+############################################################
+#
+# mybatis 配置
+#
+############################################################
+mybatis:
+  type-aliases-package: com.zhouzhu.pojo
+  mapper-locations: classpath:mapper/*.xml
+#通用 Mapper 配置
+mapper:
+  mappers: com.zhouzhu.utils.MyMapper
+  not-empty: false
+  identity: MYSQL
+#分页插件配置
+pagehelper:
+  helper-dialect: mysql
+  support-methods-arguments: true
+  params: count=coountSql
+############################################################
+#
+# Server 服务端相关配置
+#
+############################################################
+server:
+  port: 8065 # 配置api端口号
+  tomcat:
+    uri-encoding: UTF-8 # tomcat 相关常用配置
