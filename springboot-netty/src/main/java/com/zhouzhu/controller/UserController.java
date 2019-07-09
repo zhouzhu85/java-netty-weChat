@@ -27,8 +27,8 @@ public class UserController {
 
     @PostMapping("/registOrlogin")
     public IMoocJSONResult registOrLogin(@RequestBody Users users) throws Exception{
-        if (StringUtils.isNotBlank(users.getUsername())
-                || StringUtils.isNotBlank(users.getPassword())){
+        if (!StringUtils.isNotBlank(users.getUsername())
+                || !StringUtils.isNotBlank(users.getPassword())){
             return IMoocJSONResult.errorMsg("用户名或密码不能为空");
         }
         boolean usernameIsExist = userService.queryUsernameIsExist(users.getUsername());
