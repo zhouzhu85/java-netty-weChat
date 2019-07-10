@@ -85,4 +85,14 @@ public class UserController {
         return IMoocJSONResult.ok(user);
     }
 
+    @PostMapping("setNickname")
+    public IMoocJSONResult setNickname(@RequestBody UsersBO usersBO) throws Exception{
+        Users user=new Users();
+        user.setId(usersBO.getUserId());
+        user.setNickname(usersBO.getNickname());
+
+        user=userService.updateUserInfo(user);
+        return IMoocJSONResult.ok(user);
+    }
+
 }
