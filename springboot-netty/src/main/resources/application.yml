@@ -46,3 +46,17 @@ server:
   port: 8065 # 配置api端口号
   tomcat:
     uri-encoding: UTF-8 # tomcat 相关常用配置
+
+# ###########################################################
+#
+# 分布式文件系统fdfs配置
+#
+# ###########################################################
+fdfs:
+  so-timeout: 1501
+  connect-timeout: 601
+  thumb-image:              #缩略图生成参数
+    width: 80
+    height: 80
+  tracker-list:             #TrackerList参数，支持多个
+    - 119.27.169.133:22122
