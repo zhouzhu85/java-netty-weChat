@@ -35,4 +35,13 @@ public interface UserService {
      * @param user
      */
     Users updateUserInfo(Users user);
+
+    /** 搜索朋友的前置条件
+     * @param myUserId
+     * @param friendUsername
+     * @return
+     */
+    Integer preconditionSearchFriends(String myUserId, String friendUsername);
+
+    Users queryUserInfoByUsername(String friendUsername);
 }

@@ -1,5 +1,6 @@
 package com.zhouzhu.controller;
 
+import com.zhouzhu.enums.SearchFriendsStatusEnum;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.bo.UsersBO;
 import com.zhouzhu.pojo.vo.UsersVO;
@@ -34,8 +35,8 @@ public class UserController {
 
     @PostMapping("/registOrlogin")
     public IMoocJSONResult registOrLogin(@RequestBody Users users) throws Exception{
-        if (!StringUtils.isNotBlank(users.getUsername())
-                || !StringUtils.isNotBlank(users.getPassword())){
+        if (StringUtils.isBlank(users.getUsername())
+                || StringUtils.isBlank(users.getPassword())){
             return IMoocJSONResult.errorMsg("用户名或密码不能为空");
         }
         boolean usernameIsExist = userService.queryUsernameIsExist(users.getUsername());
@@ -99,6 +100,31 @@ public class UserController {
 
         user=userService.updateUserInfo(user);
         return IMoocJSONResult.ok(user);
+    }
+
+    /**
+     * 搜索好友接口
+     * @param myUserId
+     * @param friendUsername
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/search")
+    public IMoocJSONResult searchUser(String myUserId,String friendUsername) throws Exception{
+        if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return IMoocJSONResult.errorMsg("");
+        }
+        //前置条件检测好友
+        Integer status = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if (status.equals(SearchFriendsStatusEnum.SUCCESS.status)){
+            Users users = userService.queryUserInfoByUsername(friendUsername);
+            UsersVO usersVO=new UsersVO();
+            BeanUtils.copyProperties(users,usersVO);
+            return IMoocJSONResult.ok(usersVO);
+        }else {
+            String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
+            return IMoocJSONResult.errorMsg(errorMsg);
+        }
     }
 
 }
