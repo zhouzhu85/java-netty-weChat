@@ -1,10 +1,14 @@
 package com.zhouzhu.service.impl;
 
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
+import com.zhouzhu.mapper.FriendsRequestMapper;
 import com.zhouzhu.mapper.MyFriendsMapper;
 import com.zhouzhu.mapper.UsersMapper;
+import com.zhouzhu.mapper.UsersMapperCustom;
+import com.zhouzhu.pojo.FriendsRequest;
 import com.zhouzhu.pojo.MyFriends;
 import com.zhouzhu.pojo.Users;
+import com.zhouzhu.pojo.vo.FriendRequestVO;
 import com.zhouzhu.service.UserService;
 import com.zhouzhu.utils.FastDFSClient;
 import com.zhouzhu.utils.FileUtils;
@@ -19,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author zhouzhu
@@ -43,7 +49,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private MyFriendsMapper myFriendsMapper;
 
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Autowired
+    private FriendsRequestMapper friendsRequestMapper;
+
+    @Autowired
+    private UsersMapperCustom usersMapperCustom;
+
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.SUPPORTS)
     @Override
     public boolean queryUsernameIsExist(String username) {
         Users user=new Users();
@@ -123,5 +135,60 @@ public class UserServiceImpl implements UserService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("username",username);
         return usersMapper.selectOneByExample(example);
+    }
+
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Override
+    public void sendFrindRequest(String myUserId, String friendUsername) {
+        //查询好友信息
+        Users friend = queryUserInfoByUsername(friendUsername);
+        //查询发送好友请求记录表
+        Example example=new Example(FriendsRequest.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("sendUserId",myUserId);
+        criteria.andEqualTo("acceptUserId",friend.getId());
+        FriendsRequest friendsRequest = friendsRequestMapper.selectOneByExample(example);
+        //如果不是好友，而且好友记录没有添加，则新增好友请求记录
+        if (ObjectUtils.isEmpty(friendsRequest)){
+            String requestId = sid.nextShort();
+            FriendsRequest request = new FriendsRequest();
+            request.setId(requestId);
+            request.setSendUserId(myUserId);
+            request.setAcceptUserId(friend.getId());
+            request.setRequestDateTime(new Date());
+            friendsRequestMapper.insert(request);
+        }
+    }
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.SUPPORTS)
+    @Override
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId) {
+        return usersMapperCustom.queryFriendRequestList(acceptUserId);
+    }
+
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Override
+    public void deleteFriendRequest(String sendUserId, String acceptUserId) {
+        Example example=new Example(FriendsRequest.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("sendUserId",sendUserId);
+        criteria.andEqualTo("acceptUserId",acceptUserId);
+        friendsRequestMapper.deleteByExample(example);
+    }
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Override
+    public void passFriendRequest(String sendUserId, String acceptUserId) {
+            saveFriends(sendUserId,acceptUserId);
+            saveFriends(acceptUserId,sendUserId);
+            deleteFriendRequest(sendUserId,acceptUserId);
+    }
+
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    private void saveFriends(String sendUserId,String acceptUserId){
+        MyFriends myFriends=new MyFriends();
+        String recordId = sid.nextShort();
+        myFriends.setId(recordId);
+        myFriends.setMyFriendUserId(acceptUserId);
+        myFriends.setMyUserId(sendUserId);
+        myFriendsMapper.insert(myFriends);
     }
 }

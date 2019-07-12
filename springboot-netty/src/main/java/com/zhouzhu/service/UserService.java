@@ -1,6 +1,9 @@
 package com.zhouzhu.service;
 
 import com.zhouzhu.pojo.Users;
+import com.zhouzhu.pojo.vo.FriendRequestVO;
+
+import java.util.List;
 
 /**
  * @author zhouzhu
@@ -43,5 +46,38 @@ public interface UserService {
      */
     Integer preconditionSearchFriends(String myUserId, String friendUsername);
 
+    /**
+     * 根据用户名查询用户对象
+     * @param friendUsername
+     * @return
+     */
     Users queryUserInfoByUsername(String friendUsername);
+
+    /**
+     *  添加好友
+     * @param myUserId
+     * @param friendUsername
+     */
+    void sendFrindRequest(String myUserId, String friendUsername);
+
+    /**
+     *  查询好友请求
+     * @param acceptUserId
+     * @return
+     */
+    List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
+
+    /**
+     * 删除好友请求记录
+     * @param sendUserId
+     * @param acceptUserId
+     */
+    void deleteFriendRequest(String sendUserId, String acceptUserId);
+
+    /**
+     *  通过好友请求
+     * @param sendUserId
+     * @param acceptUserId
+     */
+    void passFriendRequest(String sendUserId, String acceptUserId);
 }

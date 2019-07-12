@@ -1,5 +1,6 @@
 package com.zhouzhu.controller;
 
+import com.zhouzhu.enums.OperatorFriendRequestTypeEnum;
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.bo.UsersBO;
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.swing.*;
+import java.security.PublicKey;
 
 /**
  * @author zhouzhu
@@ -112,7 +116,7 @@ public class UserController {
     @PostMapping("/search")
     public IMoocJSONResult searchUser(String myUserId,String friendUsername) throws Exception{
         if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
-            return IMoocJSONResult.errorMsg("");
+            return IMoocJSONResult.errorMsg("昵称不能为空");
         }
         //前置条件检测好友
         Integer status = userService.preconditionSearchFriends(myUserId, friendUsername);
@@ -125,6 +129,68 @@ public class UserController {
             String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
             return IMoocJSONResult.errorMsg(errorMsg);
         }
+    }
+
+    /**
+     * 发送好友请求
+     * @param myUserId
+     * @param friendUsername
+     * @return
+     */
+    @PostMapping("addFriendRequest")
+    public IMoocJSONResult addFriend(String myUserId,String friendUsername){
+        if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return IMoocJSONResult.errorMsg("昵称不能为空");
+        }
+        //前置条件检测好友
+        Integer status = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if (status.equals(SearchFriendsStatusEnum.SUCCESS.status)){
+            userService.sendFrindRequest(myUserId,friendUsername);
+        }else {
+            String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
+            return IMoocJSONResult.errorMsg(errorMsg);
+        }
+        return IMoocJSONResult.ok();
+    }
+
+    /**
+     * 查询好友请求列表
+     * @param userId
+     * @return
+     */
+    @PostMapping("queryFriendRequests")
+    public IMoocJSONResult queryFriendRequests(String userId){
+        if (StringUtils.isBlank(userId)){
+            return IMoocJSONResult.errorMsg("好友不存在");
+        }
+        return IMoocJSONResult.ok(userService.queryFriendRequestList(userId));
+    }
+
+    /**
+     * 接收方通过或者忽略朋友请求
+     * @param acceptUserId
+     * @param sendUserId
+     * @param operType
+     * @return
+     */
+    @PostMapping("operFriendRequest")
+    public IMoocJSONResult queryFriendRequests(String acceptUserId,String sendUserId,Integer operType){
+        if (StringUtils.isBlank(acceptUserId) || StringUtils.isBlank(sendUserId) || operType==null){
+            return IMoocJSONResult.errorMsg("好友不存在");
+        }
+        //没有对应的枚举值，抛出错误信息
+        if (StringUtils.isBlank(OperatorFriendRequestTypeEnum.getMsgByType(operType))){
+            return IMoocJSONResult.errorMsg("");
+        }
+        //若是忽略，删除好友请求
+        if (operType.equals(OperatorFriendRequestTypeEnum.IGNORE.type)){
+            userService.deleteFriendRequest(sendUserId,acceptUserId);
+        }
+        //若是通过，添加成好友
+        else if(operType.equals(OperatorFriendRequestTypeEnum.PASS.type)){
+            userService.passFriendRequest(sendUserId,acceptUserId);
+        }
+        return IMoocJSONResult.ok();
     }
 
 }
