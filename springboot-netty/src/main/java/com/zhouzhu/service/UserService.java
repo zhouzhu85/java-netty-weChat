@@ -2,6 +2,7 @@ package com.zhouzhu.service;
 
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.vo.FriendRequestVO;
+import com.zhouzhu.pojo.vo.MyFriendsVO;
 
 import java.util.List;
 
@@ -80,4 +81,11 @@ public interface UserService {
      * @param acceptUserId
      */
     void passFriendRequest(String sendUserId, String acceptUserId);
+
+    /**
+     * 查询好友列表
+     * @param userId
+     * @return
+     */
+    List<MyFriendsVO> queryMyFriendss(String userId);
 }

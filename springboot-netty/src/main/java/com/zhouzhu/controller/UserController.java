@@ -4,6 +4,7 @@ import com.zhouzhu.enums.OperatorFriendRequestTypeEnum;
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.bo.UsersBO;
+import com.zhouzhu.pojo.vo.MyFriendsVO;
 import com.zhouzhu.pojo.vo.UsersVO;
 import com.zhouzhu.service.UserService;
 import com.zhouzhu.utils.FastDFSClient;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.swing.*;
 import java.security.PublicKey;
+import java.util.List;
 
 /**
  * @author zhouzhu
@@ -190,7 +192,21 @@ public class UserController {
         else if(operType.equals(OperatorFriendRequestTypeEnum.PASS.type)){
             userService.passFriendRequest(sendUserId,acceptUserId);
         }
-        return IMoocJSONResult.ok();
+        //获取好友列表
+        List<MyFriendsVO> myFriends = userService.queryMyFriendss(acceptUserId);
+        return IMoocJSONResult.ok(myFriends);
     }
 
+    /**
+     * 查询我的好友列表
+     * @param userId
+     * @return
+     */
+    @PostMapping("myFriends")
+    public IMoocJSONResult myFriends(String userId){
+        if (StringUtils.isBlank(userId)){
+            return IMoocJSONResult.errorMsg("");
+        }
+        return IMoocJSONResult.ok(userService.queryMyFriendss(userId));
+    }
 }

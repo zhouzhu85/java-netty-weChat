@@ -9,6 +9,7 @@ import com.zhouzhu.pojo.FriendsRequest;
 import com.zhouzhu.pojo.MyFriends;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.vo.FriendRequestVO;
+import com.zhouzhu.pojo.vo.MyFriendsVO;
 import com.zhouzhu.service.UserService;
 import com.zhouzhu.utils.FastDFSClient;
 import com.zhouzhu.utils.FileUtils;
@@ -190,5 +191,10 @@ public class UserServiceImpl implements UserService {
         myFriends.setMyFriendUserId(acceptUserId);
         myFriends.setMyUserId(sendUserId);
         myFriendsMapper.insert(myFriends);
+    }
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.SUPPORTS)
+    @Override
+    public List<MyFriendsVO> queryMyFriendss(String userId) {
+        return usersMapperCustom.queryMyFriends(userId);
     }
 }
