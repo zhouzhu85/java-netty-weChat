@@ -11,4 +11,6 @@ import java.util.List;
 public interface UsersMapperCustom extends MyMapper<Users> {
     List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
     List<MyFriendsVO> queryMyFriends(String userId);
+    void batchUpdateMsgSigned(List<String> msgIdList);
+
 }

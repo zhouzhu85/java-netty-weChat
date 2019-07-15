@@ -1,10 +1,9 @@
 package com.zhouzhu.service.impl;
 
+import com.zhouzhu.enums.MsgSignFlagEnum;
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
-import com.zhouzhu.mapper.FriendsRequestMapper;
-import com.zhouzhu.mapper.MyFriendsMapper;
-import com.zhouzhu.mapper.UsersMapper;
-import com.zhouzhu.mapper.UsersMapperCustom;
+import com.zhouzhu.mapper.*;
+import com.zhouzhu.netty.ChatMsg;
 import com.zhouzhu.pojo.FriendsRequest;
 import com.zhouzhu.pojo.MyFriends;
 import com.zhouzhu.pojo.Users;
@@ -55,6 +54,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UsersMapperCustom usersMapperCustom;
+
+    @Autowired
+    private ChatMsgMapper chatMsgMapper;
 
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.SUPPORTS)
     @Override
@@ -196,5 +198,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<MyFriendsVO> queryMyFriendss(String userId) {
         return usersMapperCustom.queryMyFriends(userId);
+    }
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Override
+    public String saveMsg(ChatMsg chatMsg) {
+        com.zhouzhu.pojo.ChatMsg msgDB=new com.zhouzhu.pojo.ChatMsg();
+        String msgId=sid.nextShort();
+        msgDB.setId(msgId);
+        msgDB.setAcceptUserId(chatMsg.getReceiverId());
+        msgDB.setSendUserId(chatMsg.getSenderId());
+        msgDB.setCreateTime(new Date());
+        msgDB.setSignFlag(MsgSignFlagEnum.unsign.type);
+        msgDB.setMsg(chatMsg.getMsg());
+        chatMsgMapper.insert(msgDB);
+        return msgId;
+    }
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    @Override
+    public void updateMsgSigned(List<String> msgIdList) {
+        usersMapperCustom.batchUpdateMsgSigned(msgIdList);
     }
 }

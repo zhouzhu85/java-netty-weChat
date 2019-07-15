@@ -1,5 +1,6 @@
 package com.zhouzhu.service;
 
+import com.zhouzhu.netty.ChatMsg;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.vo.FriendRequestVO;
 import com.zhouzhu.pojo.vo.MyFriendsVO;
@@ -88,4 +89,17 @@ public interface UserService {
      * @return
      */
     List<MyFriendsVO> queryMyFriendss(String userId);
+
+    /**
+     * 保存聊天消息到数据库
+     * @param chatMsg
+     * @return
+     */
+    String saveMsg(ChatMsg chatMsg);
+
+    /**
+     * 批量签收消息
+     * @param msgIdList
+     */
+    void updateMsgSigned(List<String> msgIdList);
 }
