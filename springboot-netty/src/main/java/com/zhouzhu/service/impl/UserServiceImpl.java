@@ -1,9 +1,12 @@
 package com.zhouzhu.service.impl;
 
+import com.zhouzhu.enums.MsgActionEnum;
 import com.zhouzhu.enums.MsgSignFlagEnum;
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
 import com.zhouzhu.mapper.*;
 import com.zhouzhu.netty.ChatMsg;
+import com.zhouzhu.netty.DataContent;
+import com.zhouzhu.netty.UserChannelRel;
 import com.zhouzhu.pojo.FriendsRequest;
 import com.zhouzhu.pojo.MyFriends;
 import com.zhouzhu.pojo.Users;
@@ -12,7 +15,10 @@ import com.zhouzhu.pojo.vo.MyFriendsVO;
 import com.zhouzhu.service.UserService;
 import com.zhouzhu.utils.FastDFSClient;
 import com.zhouzhu.utils.FileUtils;
+import com.zhouzhu.utils.JsonUtils;
 import com.zhouzhu.utils.QRCodeUtils;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -180,9 +186,17 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
     @Override
     public void passFriendRequest(String sendUserId, String acceptUserId) {
-            saveFriends(sendUserId,acceptUserId);
-            saveFriends(acceptUserId,sendUserId);
-            deleteFriendRequest(sendUserId,acceptUserId);
+        saveFriends(sendUserId,acceptUserId);
+        saveFriends(acceptUserId,sendUserId);
+        deleteFriendRequest(sendUserId,acceptUserId);
+
+        Channel sendChannel = UserChannelRel.get(sendUserId);
+        if (sendChannel!=null){
+            //使用websocket主动推送消息到请求发起者，更新他的通讯录列表为最新
+            DataContent dataContent=new DataContent();
+            dataContent.setAction(MsgActionEnum.PULL_FRIEND.type);
+            sendChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.objectToJson(dataContent)));
+        }
     }
 
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
