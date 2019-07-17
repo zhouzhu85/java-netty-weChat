@@ -2,6 +2,7 @@ package com.zhouzhu.controller;
 
 import com.zhouzhu.enums.OperatorFriendRequestTypeEnum;
 import com.zhouzhu.enums.SearchFriendsStatusEnum;
+import com.zhouzhu.pojo.ChatMsg;
 import com.zhouzhu.pojo.Users;
 import com.zhouzhu.pojo.bo.UsersBO;
 import com.zhouzhu.pojo.vo.MyFriendsVO;
@@ -208,5 +209,19 @@ public class UserController {
             return IMoocJSONResult.errorMsg("");
         }
         return IMoocJSONResult.ok(userService.queryMyFriendss(userId));
+    }
+
+    /**
+     * 用户手机端获取未签收的消息列表
+     * @param acceptUserId
+     * @return
+     */
+    @PostMapping("getUnReadMsgList")
+    public IMoocJSONResult getUnReadMsgList(String acceptUserId){
+        if (StringUtils.isBlank(acceptUserId)){
+            return IMoocJSONResult.errorMsg("");
+        }
+        List<ChatMsg> unreadMsgList = userService.getUnReadMsgList(acceptUserId);
+        return IMoocJSONResult.ok(unreadMsgList);
     }
 }
